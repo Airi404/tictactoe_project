@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Lista de partidas{% endblock %}
+
+{% block content %}
+<div class="mt-10">
+  <h2 class="text-3xl font-bold text-center text-cyan-400 mb-6">Partidas disponibles</h2>
+
+  {% if games %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for game in games %}
+        <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-lg">
+          <!-- Nombre de sala -->
+          <h3 class="text-xl font-semibold text-green-400 mb-2">{{ game.room_name }}</h3>
+
+          <!-- Owner y estado -->
+          <p class="text-gray-300 text-sm">Creador: {{ game.owner.username }}</p>
+          <p class="text-gray-300 text-sm mb-4">Estado: {{ game.state }}</p>
+
+          <!-- Ver/Jugar según usuario -->
+          <a href="{% url 'game_detail' game.id %}"
+             class="px-4 py-2 rounded bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 transition">
+             {% if request.user == game.owner %}Jugar{% else %}Ver{% endif %}
+          </a>
+
+          <!-- Borrar sala (solo owner) -->
+          {% if request.user == game.owner %}
+            <form method="post" action="{% url 'game_detail' game.id %}" class="mt-2">
+              {% csrf_token %}
+              <button type="submit" name="end"
+                      onclick="return confirm('¿Seguro que quieres borrar esta sala?')"
+                      class="px-3 py-1 rounded bg-red-600 hover:bg-red-500 text-white text-sm">
+                Borrar
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-400">No hay partidas creadas todavía.</p>
+  {% endif %}
+
+  <!-- Crear nueva -->
+  <div class="text-center mt-6">
+    <a href="{% url 'create_game' %}"
+       class="px-4 py-2 rounded bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 transition">
+        Crear nueva partida
+    </a>
+  </div>
+</div>
+{% endblock %}

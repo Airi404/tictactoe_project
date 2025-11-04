@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Tres en Raya{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white min-h-screen flex flex-col font-sans">
+
+  <!-- Barra de navegación -->
+  <nav class="bg-black/40  p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="{% url 'home' %}" class="font-extrabold text-2xl text-cyan-400 hover:text-cyan-300 transition">
+        🎲 Tres en Raya
+      </a>
+      <div>
+        {% if request.user.is_authenticated %}
+          <span class="mr-4">👤 {{ request.user.username }}</span>
+      <form method="post" action="{% url 'logout' %}" class="inline">
+        {% csrf_token %}
+        <button type="submit" class="px-3 py-1 rounded bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500 transform hover:scale-105 transition">
+        Cerrar sesión
+        </button>
+      </form>
+        {% else %}
+          <a href="{% url 'login' %}" class="px-3 py-1 rounded bg-cyan-600 hover:bg-cyan-500 transition">Entrar</a>
+          <a href="{% url 'password_reset' %}" class="ml-2 px-3 py-1 rounded bg-purple-600 hover:bg-purple-500 transition">Recuperar</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Contenido principal -->
+  <main class="flex-grow container mx-auto p-6">
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  <footer class="bg-black/40 text-center py-4 text-sm text-gray-400">
+    © 2025 Tres en Raya – Proyecto Django
+  </footer>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Bienvenido{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center text-center mt-20">
+  <h1 class="text-5xl font-extrabold text-cyan-400 drop-shadow-lg mb-6">
+    Bienvenido a Tres en Raya
+  </h1>
+  <p class="text-lg text-gray-300 mb-10 max-w-xl">
+    Crea partidas, reta a tus amigos y demuestra quién es el verdadero maestro del tablero.
+  </p>
+  {% if request.user.is_authenticated %}
+    <a href="{% url 'game_list' %}" class="bg-blue-600 text-white px-4 py-2 rounded">
+      Ir a mis partidas
+    </a>
+  {% else %}
+    <div class="mx-auto">
+        <a href="{% url 'login' %}" class="bg-green-600 text-white px-4 py-2 rounded mr-4">
+        Iniciar sesión
+        </a>
+        <a href="{% url 'register' %}" class="bg-purple-600 text-white px-4 py-2 rounded">
+        Registrarse
+        </a>
+    </div>
+  {% endif %}
+{% endblock %}

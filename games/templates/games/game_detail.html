@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+{% block title %}Partida: {{ game.room_name }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center mt-10">
+  <h2 class="text-3xl font-bold text-cyan-400 mb-6">
+    Partida: {{ game.room_name }}
+  </h2>
+
+  <!-- Estado de la partida -->
+  {% if game.state == "ACTIVE" %}
+  <p>Turno de: {% if game.active_player == 1 %}Jugador 1 (X){% else %}Jugador 2 (O){% endif %}</p>
+    {% elif game.state == "WON_P1" %}
+  <p> Ganó Jugador 1 (X)</p>
+    {% elif game.state == "WON_P2" %}
+  <p> Ganó Jugador 2 (O)</p>
+    {% elif game.state == "TIE" %}
+  <p> Empate</p>
+  {% endif %}
+
+  <!-- Tablero 3x3 -->
+  <form method="post" class="grid grid-cols-3 gap-2 mt-4">
+  {% csrf_token %}
+  {% for cell in cells %}
+    <button name="move" value="{{ forloop.counter0 }}"
+            class="w-20 h-20 flex items-center justify-center text-2xl font-bold 
+                   bg-black/40 text-white rounded shadow hover:bg-cyan-600 transition"
+            {% if cell != "_" or game.state != "ACTIVE" %}disabled{% endif %}>
+      {% if cell == "_" %}&nbsp;{% else %}{{ cell }}{% endif %}
+    </button>
+  {% endfor %}
+</form>
+
+  <!-- Botón de reinicio -->
+  {% if request.user == game.owner %}
+<form method="post" class="mt-4">
+  {% csrf_token %}
+  <button type="submit" name="reset"
+          class="px-4 py-2 rounded bg-red-400 hover:bg-red-500 text-white font-bold">
+    Reiniciar partida
+  </button>
+</form>
+{% endif %}
+
+ <!-- Botón de finalizar partida (borra la sala) -->
+{% if request.user == game.owner %}
+  <form method="post" class="mt-2">
+    {% csrf_token %}
+    <button type="submit" name="end"
+            onclick="return confirm('¿Seguro que quieres borrar esta sala?')"
+            class="px-4 py-2 rounded bg-red-700 hover:bg-red-600 text-white font-bold">
+       Finalizar y borrar sala
+    </button>
+  </form>
+{% endif %}
+
+
+  <div class="mt-6">
+    <a href="{% url 'game_list' %}" 
+       class="px-4 py-2 rounded bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500"> Volver a la lista
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+{% extends 'base.html' %}
+
+{% block title %}Sesión cerrada{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center mt-20">
+  <div class="bg-black/40 p-8 rounded-xl shadow-lg text-center">
+    <h2 class="text-2xl font-bold text-red-400 mb-4">Has cerrado sesión</h2>
+    <a href="{% url 'home' %}" 
+       class="px-4 py-2 rounded bg-cyan-600 hover:bg-cyan-500 transition">
+       Volver al inicio
+    </a>
+  </div>
+</div>
+{% endblock %}
