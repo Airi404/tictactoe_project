@@ -4,15 +4,34 @@
 {% block title %}Listado de partidas{% endblock %}
 
 {% block content %}
-    <h1>Nueva partida</h1>
+    <h1 class="text-3xl font-extrabold text-white drop-shadow-lg mb-6">Nueva partida</h1>
     <form method="post">
     {% csrf_token %}
-    <label>Nombre de sala:</label>
-    <input type="text" name="room_name" required>
-    <button type="submit">Crear</button>
+    <label class="mr-4">Nombre de sala:</label>
+    <input type="text" name="room_name" required class="w-80 px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 mr-4"/>
+    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-10">Crear</button>
     </form>
-
     {% for message in messages %}
-    <p style="color:crimson">{{ message }}</p>
+    <div class="mt-4">
+          <div class="bg-gray-800/50 text-red-400 italic px-4 py-2 rounded">{{ message }}</div>
     {% endfor %}
+    
+    <h2 class="text-2xl font-extrabold text-white drop-shadow-lg mb-6 mt-10">Salas existentes: </h2>
+    {% if games %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for game in games %}
+            <div class="bg-black/40 backdrop-blur-md p-6 rounded-xl shadow-lg">
+            <!-- Nombre de sala -->
+            <h3 class="text-xl font-semibold text-green-400 mb-2">{{ game.room_name }}</h3>
+
+            <p class="text-gray-300 text-sm">Creador: {{ game.owner.username }}</p>
+            <p class="text-gray-300 text-sm mb-4">Estado: {{ game.state }}</p>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-400">No hay partidas creadas todavía.</p>
+    {% endif %}
+
+    
 {% endblock %}

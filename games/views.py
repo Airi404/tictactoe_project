@@ -1,10 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 from django.contrib.auth import login
 from .forms import SignUpForm
-from django.shortcuts import get_object_or_404
+from django.contrib import messages
 from .models import Game
 
 def home(request):
@@ -59,11 +58,13 @@ def game_detail(request, game_id):
             symbol = "X" if game.active_player == 1 else "O"
             board[move] = symbol
             game.board = "".join(board)
-
-            wins = [(0,1,2),(3,4,5),(6,7,8),
+            # Comprobar si hay ganador o empate
+            wins = [(0,1,2),(3,4,5),(6,7,8), 
                     (0,3,6),(1,4,7),(2,5,8),
                     (0,4,8),(2,4,6)]
+                    #combinaciones ganadoras
             for a,b,c in wins:
+                # Verificar si hay un ganador
                 if game.board[a] == game.board[b] == game.board[c] != "_":
                     game.state = "WON_P1" if symbol == "X" else "WON_P2"
                     break
@@ -80,15 +81,22 @@ def game_detail(request, game_id):
 
 @login_required
 def create_game(request):
+    games = Game.objects.all()
+    
     if request.method == 'POST':
         room_name = request.POST.get('room_name')
-        game = Game.objects.create(
-            room_name=room_name,
-            owner=request.user,
-            board='_' * 9,
-            active_player=1,
-            state='ACTIVE'
-        )
-        return redirect('game_detail', game_id=game.id)
-    return render(request, 'games/create_game.html')
+        
+        if Game.objects.filter(room_name=room_name).exists():
+            messages.error(request, 'El nombre de la sala ya existe. Por favor, elige otro nombre.')
+        else:        
+            game = Game.objects.create(
+                room_name=room_name,
+                owner=request.user,
+                #tabla vacia
+                board='_' * 9,
+                active_player=1,
+                state='ACTIVE'
+                )
+            return redirect('game_detail', game_id=game.id)
+    return render(request, 'games/create_game.html', {'games': games})
 
