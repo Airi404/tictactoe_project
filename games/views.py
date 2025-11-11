@@ -31,51 +31,6 @@ def game_list(request):
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
 
-    # Borrar sala
-    if request.method == "POST" and "end" in request.POST and request.user == game.owner:
-        game.delete()
-        return redirect("game_list")
-
-    # Reiniciar partida (solo owner)
-    if request.method == "POST" and "reset" in request.POST and request.user == game.owner:
-        game.board = "_" * 9
-        game.active_player = 1
-        game.state = "ACTIVE"
-        game.save()
-        return redirect("game_detail", game_id=game.id)
-
-    # Procesar jugada (solo owner, partida activa)
-    if (
-        request.method == "POST" and
-        "move" in request.POST and
-        request.user == game.owner and
-        game.state == "ACTIVE"
-    ):
-        move = int(request.POST.get("move"))
-        board = list(game.board)
-
-        if 0 <= move <= 8 and board[move] == "_":
-            symbol = "X" if game.active_player == 1 else "O"
-            board[move] = symbol
-            game.board = "".join(board)
-            # Comprobar si hay ganador o empate
-            wins = [(0,1,2),(3,4,5),(6,7,8), 
-                    (0,3,6),(1,4,7),(2,5,8),
-                    (0,4,8),(2,4,6)]
-                    #combinaciones ganadoras
-            for a,b,c in wins:
-                # Verificar si hay un ganador
-                if game.board[a] == game.board[b] == game.board[c] != "_":
-                    game.state = "WON_P1" if symbol == "X" else "WON_P2"
-                    break
-            else:
-                if "_" not in game.board:
-                    game.state = "TIE"
-                else:
-                    game.active_player = 2 if game.active_player == 1 else 1
-
-            game.save()
-
     cells = list(game.board)
     return render(request, "games/game_detail.html", {"game": game, "cells": cells})
 

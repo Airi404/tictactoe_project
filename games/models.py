@@ -11,6 +11,7 @@ class Game(models.Model):
 
     room_name = models.CharField(max_length=100, unique=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_games')
+    player2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='joined_games', null=True, blank=True)
     board = models.CharField(max_length=9, default='_' * 9)
     active_player = models.IntegerField(default=1)  # 1 = Jugador 1 (X), 2 = Jugador 2 (O)
     state = models.CharField(max_length=10, choices=STATE_CHOICES, default='ACTIVE')
