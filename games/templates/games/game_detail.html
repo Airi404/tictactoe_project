@@ -62,4 +62,52 @@
     </a>
   </div>
 </div>
+{{ my_data|json_script:"my_data_json" }}
+<script>
+    const usable_data = JSON.parse(
+      document.getElementById('my_data_json').textContent
+    );
+    console.log("Datos recibidos desde Django:", usable_data);
+    // usable_data tiene el mismo valor que my_data
+</script>
+
+<script>
+  const room_id = "{{ game.id }}";
+
+  const gameSocket = new WebSocket(
+      'ws://' + window.location.host + '/ws/tictactoe/ ' + room_id + '/'
+  );
+
+  gameSocket.onopen = function(e) {
+      console.log('Connected to socket');
+  };
+  
+  gameSocket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      console.log('New Message Received:', data);
+
+      if (data.board) {
+          // Actualizar el tablero
+          const cells = data.board.split('');
+          const buttons = document.querySelectorAll('form button[name="move"]');
+          cells.forEach((cell, index) => {
+              buttons[index].innerHTML = cell === "_" ? "&nbsp;" : cell;
+              buttons[index].disabled = cell !== "_" || data.state !== "ACTIVE";
+      });
+  };
+
+    document.querySelectorAll('form button[name="move"]').forEach(button => {
+      button.addEventListener('click', function(event) {
+        event.preventDefault();
+        const move = this.value;
+        gameSocket.send(JSON.stringify({
+          'action': 'move',
+          'game_id': room_id,
+          'move': parseInt(move),
+          'user_id': '{{ request.user.id }}',
+        }));
+      });
+    });
+  };
+</script>
 {% endblock %}
