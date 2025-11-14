@@ -31,15 +31,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'games',
     "widget_tweaks",
-    'daphne',
 ]
 
 MIDDLEWARE = [
@@ -134,6 +135,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = 'home'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-ASGI_APPLICATION = 'myproject.asgi.application'
+ASGI_APPLICATION = 'tictactoe_project.asgi.application'
 
 

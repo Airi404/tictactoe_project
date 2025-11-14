@@ -7,40 +7,47 @@
   <h2 class="text-3xl font-bold text-cyan-400 mb-6">
     Partida: {{ game.room_name }}
   </h2>
-
+  
   <!-- Estado de la partida -->
   {% if game.state == "ACTIVE" %}
-  <p>Turno de: {% if game.active_player == 1 %}Jugador 1 (X){% else %}Jugador 2 (O){% endif %}</p>
+    <p><strong>Jugador 1 (X):</strong> {{ game.owner.username }}</p>
+    <p><strong>Jugador 2 (O):</strong> <span id="player2">{% if game.player2 %}{{ game.player2.username }}{% else %}Esperando{% endif %}</span></p>
+    
+    <p id="turno">
+      Turno de: {% if game.active_player == 1 %}Jugador 1 (X){% else %}Jugador 2 (O){% endif %}
+    </p>
+
     {% elif game.state == "WON_P1" %}
-  <p> Ganó Jugador 1 (X)</p>
+      <p> Ganó Jugador 1 (X)</p>
+
     {% elif game.state == "WON_P2" %}
-  <p> Ganó Jugador 2 (O)</p>
+      <p> Ganó Jugador 2 (O)</p>
+
     {% elif game.state == "TIE" %}
-  <p> Empate</p>
+      <p> Empate</p>
+      
   {% endif %}
 
   <!-- Tablero 3x3 -->
-  <form method="post" class="grid grid-cols-3 gap-2 mt-4">
-  {% csrf_token %}
+  <div class="grid grid-cols-3 gap-2 mt-4" id="tablero">
   {% for cell in cells %}
-    <button name="move" value="{{ forloop.counter0 }}"
+    <button type="button" data-move="{{ forloop.counter0 }}"
             class="w-20 h-20 flex items-center justify-center text-2xl font-bold 
-                   bg-black/40 text-white rounded shadow hover:bg-cyan-600 transition"
-            {% if cell != "_" or game.state != "ACTIVE" %}disabled{% endif %}>
+                   bg-black/40 text-white rounded shadow hover:bg-cyan-600 transition">
       {% if cell == "_" %}&nbsp;{% else %}{{ cell }}{% endif %}
     </button>
   {% endfor %}
-</form>
+  </div>
 
   <!-- Botón de reinicio -->
   {% if request.user == game.owner %}
-<form method="post" class="mt-4">
-  {% csrf_token %}
-  <button type="submit" name="reset"
-          class="px-4 py-2 rounded bg-red-400 hover:bg-red-500 text-white font-bold">
-    Reiniciar partida
-  </button>
-</form>
+  <form method="post" class="mt-4">
+    {% csrf_token %}
+    <button type="submit" name="reset"
+            class="px-4 py-2 rounded bg-red-400 hover:bg-red-500 text-white font-bold">
+      Reiniciar partida
+    </button>
+  </form>
 {% endif %}
 
  <!-- Botón de finalizar partida (borra la sala) -->
@@ -57,12 +64,23 @@
 
 
   <div class="mt-6">
+    {% if request.user == game.owner %}
     <a href="{% url 'game_list' %}" 
        class="px-4 py-2 rounded bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500"> Volver a la lista
     </a>
+    {% else %}
+     <form method="post" action="{% url 'leave_game' game.id %}" 
+          onsubmit="return confirm('¿Seguro que desea salir?')">
+      {% csrf_token %}
+      <button type="submit"
+              class="px-4 py-2 rounded bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500">
+        Volver a la lista
+      </button>
+    </form>
+  {% endif %}
   </div>
 </div>
-{{ my_data|json_script:"my_data_json" }}
+
 <script>
     const usable_data = JSON.parse(
       document.getElementById('my_data_json').textContent
@@ -73,41 +91,75 @@
 
 <script>
   const room_id = "{{ game.id }}";
+  const buttons = document.querySelectorAll('#tablero button');
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const gameSocket = new WebSocket(`${protocol}://${window.location.host}/ws/game/${room_id}/`);
+  
+  const playerId = Number("{{ request.user.id }}");
+  const ownerId = Number("{{ game.owner.id }}");
+  const player2Id = "{{ game.player2.id|default_if_none:'' }}" !== "" ? Number("{{ game.player2.id }}") : null;
 
-  const gameSocket = new WebSocket(
-      'ws://' + window.location.host + '/ws/tictactoe/ ' + room_id + '/'
-  );
+  buttons.forEach(button => {
+      button.addEventListener('click', function() {
+        const move = Number(this.dataset.move);
+
+        gameSocket.send(JSON.stringify({
+          'action': 'move',
+          'game_id': room_id,
+          'move': move,
+          'user_id': playerId,
+        }));
+      });
+    });
 
   gameSocket.onopen = function(e) {
       console.log('Connected to socket');
   };
   
+  
   gameSocket.onmessage = function(e) {
-      const data = JSON.parse(e.data);
-      console.log('New Message Received:', data);
+    const data = JSON.parse(e.data);
+    console.log('New Message Received:', data);
+    if (data.reload) {
+    // refrescar la página
+    window.location.reload();
+    return;
+    }
+    if (data.board) {
+        const cells = data.board.split('');
 
-      if (data.board) {
-          // Actualizar el tablero
-          const cells = data.board.split('');
-          const buttons = document.querySelectorAll('form button[name="move"]');
-          cells.forEach((cell, index) => {
-              buttons[index].innerHTML = cell === "_" ? "&nbsp;" : cell;
-              buttons[index].disabled = cell !== "_" || data.state !== "ACTIVE";
-      });
-  };
+        // Asegurarnos de que ownerId/player2Id sean números o null
+        const ownerIdNum = Number(data.owner_id || ownerId);
+        const player2IdNum = data.player2_id === null ? null : Number(data.player2_id);
 
-    document.querySelectorAll('form button[name="move"]').forEach(button => {
-      button.addEventListener('click', function(event) {
-        event.preventDefault();
-        const move = this.value;
-        gameSocket.send(JSON.stringify({
-          'action': 'move',
-          'game_id': room_id,
-          'move': parseInt(move),
-          'user_id': '{{ request.user.id }}',
-        }));
-      });
-    });
-  };
+        const isMyTurn = (data.active_player === 1 && playerId === ownerIdNum) ||
+                         (data.active_player === 2 && playerId === player2IdNum);
+
+        buttons.forEach((button, index) => {
+            button.innerHTML = cells[index] === "_" ? "" : cells[index];
+            // habilitar/deshabilitar según turno y estado
+            button.disabled = cells[index] !== "_" || !isMyTurn || data.state !== "ACTIVE";
+        });
+
+      const p2Element = document.querySelector("#player2");
+
+      if (p2Element && data.player2 !== undefined) {
+        p2Element.textContent = data.player2 ? data.player2 : "Esperando";
+      }
+        // Actualizar turno en UI (opcional)
+        const turnoEl = document.querySelector("#turno");
+        if (turnoEl) {
+          if (data.state === "ACTIVE") {
+            turnoEl.textContent = "Turno de: " + (data.active_player === 1 ? "Jugador 1 (X)" : "Jugador 2 (O)");
+          } else if (data.state === "TIE") {
+            turnoEl.textContent = "Empate";
+          } else if (data.state === "WON_P1") {
+            turnoEl.textContent = "Ganó Jugador 1 (X)";
+          } else if (data.state === "WON_P2") {
+            turnoEl.textContent = "Ganó Jugador 2 (O)";
+          }
+        }
+      }
+    }
 </script>
 {% endblock %}

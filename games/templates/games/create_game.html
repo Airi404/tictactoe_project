@@ -4,11 +4,15 @@
 {% block title %}Listado de partidas{% endblock %}
 
 {% block content %}
+
     <h1 class="text-3xl font-extrabold text-white drop-shadow-lg mb-6">Nueva partida</h1>
     <form method="post">
     {% csrf_token %}
     <label class="mr-4">Nombre de sala:</label>
     <input type="text" name="room_name" required class="w-80 px-4 py-2 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 mr-4"/>
+    <label>Contraseña (opcional):</label>
+    <input type="text" name="password" required class="w-80 px-4 py-2 rounded bg-gray-800 text-white"/>
+
     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded mt-10">Crear</button>
     </form>
     {% for message in messages %}
@@ -33,4 +37,5 @@
         <p class="text-center text-gray-400">No hay partidas creadas todavía.</p>
     {% endif %}
     </div>
+    
 {% endblock %}
