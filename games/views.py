@@ -58,26 +58,60 @@ def game_list(request):
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
     # Borrar sala
+    
     if request.method == "POST" and "end" in request.POST and request.user == game.owner:
         game.delete()
         # Notificar al grupo de lista
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
+            f"game_{game_id}",
+            {
+                "type": "game_message",
+                "data": {
+                    "action": "ended",
+                    "message": "La partida ha sido borrada por el dueño."
+                }
+            }
+        )
+        async_to_sync(channel_layer.group_send)(
             "games",
             {
                 "type": "game_message",
-                "data": {"reload": True}
+                "data": {
+                    "action": "deleted",
+                    "game_id": game_id
+                }
             }
-        )
+        ) 
+        async_to_sync(channel_layer.group_send)( 
+            "games", 
+            { 
+             "type": "game_message", 
+             "data": {"reload": True} 
+            } 
+        )       
         return redirect("game_list")
-
+    
     # Reiniciar partida (solo owner)
     if request.method == "POST" and "reset" in request.POST and request.user == game.owner:
         game.board = "_" * 9
         game.active_player = 1
         game.state = "ACTIVE"
         game.save()
+        
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"game_{game.id}",
+            {
+                "type": "game_message",
+                "data": {
+                    "action": "reset",
+                    "reload": True
+                }
+            }
+        )
         return redirect("game_detail", game_id=game.id)
+
     cells = list(game.board)
     return render(request, "games/game_detail.html", {"game": game, "cells": cells})
 

@@ -69,7 +69,8 @@
        class="px-4 py-2 rounded bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500"> Volver a la lista
     </a>
     {% else %}
-     <form method="post" action="{% url 'leave_game' game.id %}" 
+    
+       <form method="post" action="{% url 'leave_game' game.id %}" 
           onsubmit="return confirm('¿Seguro que desea salir?')">
       {% csrf_token %}
       <button type="submit"
@@ -120,10 +121,21 @@
   gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('New Message Received:', data);
+
+    //refrescar pagina
     if (data.reload) {
-    // refrescar la página
     window.location.reload();
     return;
+    }
+
+    if (data.action === "ended") {
+        alert(data.message);
+        window.location.href = "/games/"; // redirige a la lista
+        return;
+    }
+     if (data.action === "reset" && data.reload) {
+        window.location.reload(); // recarga automáticamente la pantalla
+        return;
     }
     if (data.board) {
         const cells = data.board.split('');
@@ -131,16 +143,17 @@
         // Asegurarnos de que ownerId/player2Id sean números o null
         const ownerIdNum = Number(data.owner_id || ownerId);
         const player2IdNum = data.player2_id === null ? null : Number(data.player2_id);
-
+        const isParticipant = (playerId === ownerId || playerId === player2IdNum);
         const isMyTurn = (data.active_player === 1 && playerId === ownerIdNum) ||
                          (data.active_player === 2 && playerId === player2IdNum);
 
         buttons.forEach((button, index) => {
             button.innerHTML = cells[index] === "_" ? "" : cells[index];
             // habilitar/deshabilitar según turno y estado
-            button.disabled = cells[index] !== "_" || !isMyTurn || data.state !== "ACTIVE";
+            button.disabled = !isParticipant || cells[index] !== "_" || !isMyTurn || data.state !== "ACTIVE";
         });
 
+        
       const p2Element = document.querySelector("#player2");
 
       if (p2Element && data.player2 !== undefined) {
