@@ -6,7 +6,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 class GameConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         #Recuperar room id
-        self.room_id = self.scope["url_route"]["kwargs"]["room_id"]
+        self.room_id = self.scope["url_route"]["kwargs"]["room_id"] #obtiene el parámetro room_id de la URL del WebSocket
         self.room_group_name = f"game_{self.room_id}"
         
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
@@ -42,7 +42,7 @@ class GameConsumer(AsyncWebsocketConsumer):
         owner_id = game.owner_id
         player2_id = game.player2_id
         
-        # Procesar jugada (solo owner, partida activa)
+        # Procesar jugada partida activa
         if action == "move" and game.state == "ACTIVE":
             
             valid_turn = (

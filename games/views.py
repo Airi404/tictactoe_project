@@ -57,8 +57,8 @@ def game_list(request):
 @login_required
 def game_detail(request, game_id):
     game = get_object_or_404(Game, id=game_id)
-    # Borrar sala
     
+    # Borrar sala
     if request.method == "POST" and "end" in request.POST and request.user == game.owner:
         game.delete()
         # Notificar al grupo de lista
@@ -69,27 +69,9 @@ def game_detail(request, game_id):
                 "type": "game_message",
                 "data": {
                     "action": "ended",
-                    "message": "La partida ha sido borrada por el dueño."
                 }
             }
         )
-        async_to_sync(channel_layer.group_send)(
-            "games",
-            {
-                "type": "game_message",
-                "data": {
-                    "action": "deleted",
-                    "game_id": game_id
-                }
-            }
-        ) 
-        async_to_sync(channel_layer.group_send)( 
-            "games", 
-            { 
-             "type": "game_message", 
-             "data": {"reload": True} 
-            } 
-        )       
         return redirect("game_list")
     
     # Reiniciar partida (solo owner)
@@ -106,7 +88,6 @@ def game_detail(request, game_id):
                 "type": "game_message",
                 "data": {
                     "action": "reset",
-                    "reload": True
                 }
             }
         )
@@ -178,5 +159,4 @@ def join_game(request, game_id):
                 messages.error(request, "Contraseña incorrecta.")
         else:
             messages.error(request, "No puedes unirte a esta partida.")
-
     return redirect("game_list")

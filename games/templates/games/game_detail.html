@@ -93,13 +93,14 @@
 <script>
   const room_id = "{{ game.id }}";
   const buttons = document.querySelectorAll('#tablero button');
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  const gameSocket = new WebSocket(`${protocol}://${window.location.host}/ws/game/${room_id}/`);
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws"; //usa wss si la página es https
+  const gameSocket = new WebSocket(`${protocol}://${window.location.host}/ws/game/${room_id}/`); //abre la conexión WebSocket
   
   const playerId = Number("{{ request.user.id }}");
   const ownerId = Number("{{ game.owner.id }}");
   const player2Id = "{{ game.player2.id|default_if_none:'' }}" !== "" ? Number("{{ game.player2.id }}") : null;
 
+  //cada botón escucha un evento click al pulsar enía al servidor un mensaje.
   buttons.forEach(button => {
       button.addEventListener('click', function() {
         const move = Number(this.dataset.move);
@@ -118,25 +119,25 @@
   };
   
   
+  
   gameSocket.onmessage = function(e) {
     const data = JSON.parse(e.data);
     console.log('New Message Received:', data);
 
-    //refrescar pagina
-    if (data.reload) {
-    window.location.reload();
-    return;
+    //redirige al usuario al listado de partidas con un mensaje.
+    if (data.action === "ended") {
+        alert(data.message || "La partida ha terminado.");
+        // Redirigir al listado de partidas
+        window.location.href = "{% url 'game_list' %}";
+        return;
     }
 
-    if (data.action === "ended") {
-        alert(data.message);
-        window.location.href = "/games/"; // redirige a la lista
-        return;
+    //recarga la página si se reinicia
+    if (data.action === "reset") {
+      location.reload();
+      return;
     }
-     if (data.action === "reset" && data.reload) {
-        window.location.reload(); // recarga automáticamente la pantalla
-        return;
-    }
+
     if (data.board) {
         const cells = data.board.split('');
 
@@ -159,7 +160,7 @@
       if (p2Element && data.player2 !== undefined) {
         p2Element.textContent = data.player2 ? data.player2 : "Esperando";
       }
-        // Actualizar turno en UI (opcional)
+        // Actualizar turno en UI.
         const turnoEl = document.querySelector("#turno");
         if (turnoEl) {
           if (data.state === "ACTIVE") {
