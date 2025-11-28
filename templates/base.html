@@ -14,10 +14,14 @@
       <a href="{% url 'home' %}" class="font-extrabold text-2xl text-cyan-400 hover:text-cyan-300 transition">
         🎲 Tres en Raya
       </a>
-      <div>
-        {% if request.user.is_authenticated %}
+    <div class="flex items-center space-x-4">
+      <a href="{% url 'predict_form' %}" 
+         class="px-3 py-1 rounded bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-400 hover:to-teal-500 transition">
+         Adivina tu edad
+      </a>        
+      {% if request.user.is_authenticated %}
           <span class="mr-4">👤 {{ request.user.username }}</span>
-      <form method="post" action="{% url 'logout' %}" class="inline">
+        <form method="post" action="{% url 'logout' %}" class="inline">
         {% csrf_token %}
         <button type="submit" class="px-3 py-1 rounded bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-400 hover:to-pink-500 transform hover:scale-105 transition">
         Cerrar sesión

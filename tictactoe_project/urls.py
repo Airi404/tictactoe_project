@@ -8,6 +8,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('register/', views.signup, name='register'),
-    path('api/', include('api.urls'))
+    path('api/', include('api.urls')),
+    path("Agify/", include("Agify.urls"))
 ]
 
