@@ -19,6 +19,10 @@
          class="px-3 py-1 rounded bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-400 hover:to-teal-500 transition">
          Adivina tu edad
       </a>        
+      <a href="{% url 'chat_ia' %}" 
+         class="px-3 py-1 rounded bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-400 hover:to-orange-500 transition">
+         Chat con bot
+      </a>
       {% if request.user.is_authenticated %}
           <span class="mr-4">👤 {{ request.user.username }}</span>
         <form method="post" action="{% url 'logout' %}" class="inline">

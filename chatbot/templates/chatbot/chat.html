@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 50px auto;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333 !important; /* Forzamos color oscuro para todo el contenedor */
+    }
+    .chat-header {
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        color: white !important; /* El encabezado sí lo queremos blanco */
+        padding: 20px;
+        text-align: center;
+    }
+    .chat-body {
+        padding: 30px;
+        background-color: white; /* Aseguramos fondo blanco en el cuerpo */
+    }
+    .form-label {
+        color: #333 !important;
+        font-weight: bold;
+    }
+    .response-area {
+        background: #f8f9fa;
+        border-left: 5px solid #6e8efb;
+        padding: 20px;
+        margin-top: 25px;
+        border-radius: 0 10px 10px 0;
+        animation: fadeIn 0.5s ease;
+        color: #212529 !important; /* Color de texto casi negro para la respuesta */
+    }
+    /* Estilo para el input de Django */
+    input[name="prompt"] {
+        color: #333 !important;
+        background-color: white !important;
+        border: 1px solid #ccc !important;
+    }
+    .btn-gemini {
+        background: linear-gradient(135deg, #6e8efb, #a777e3);
+        border: none;
+        color: white !important;
+        padding: 10px 25px;
+        border-radius: 25px;
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+    .btn-gemini:hover {
+        transform: scale(1.05);
+        color: white !important;
+    }
+    .btn-home {
+        background: #6c757d;
+        color: white !important;
+        text-decoration: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        display: inline-block;
+        margin-top: 20px;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">
+        <h2 class="mb-0" style="color: white !important;"><i class="fas fa-robot"></i> Gemini AI Assistant</h2>
+        <small style="color: rgba(255,255,255,0.8) !important;">Task 15 - 2º DAW</small>
+    </div>
+
+    <div class="chat-body">
+        <form method="post" class="mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_prompt" class="form-label">Escribe tu consulta:</label>
+                {{ form.prompt }}
+            </div>
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-gemini shadow">
+                    <i class="fas fa-paper-plane"></i> Preguntar a la IA
+                </button>
+            </div>
+        </form>
+
+        {% if response %}
+            <div class="response-area shadow-sm">
+                <h5 class="text-primary"><i class="fas fa-comment-dots"></i> Gemini dice:</h5>
+                <p class="mt-3" style="white-space: pre-wrap; line-height: 1.6; color: #333 !important;">{{ response }}</p>
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'home' %}" class="btn-home shadow-sm">
+                <i class="fas fa-home"></i> Volver a Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
