@@ -1,4 +1,4 @@
-from django import forms  # <--- Asegúrate de que diga 'django' aquí
+from django import forms
 
 class ChatForm(forms.Form):
     prompt = forms.CharField(
