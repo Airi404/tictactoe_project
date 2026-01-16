@@ -4,6 +4,13 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+django-widget-tweaks = "*"
+djangorestframework = "*"
+requests = "*"
+google = "*"
+python-dotenv = "*"
+google-genai = "*"
+google-generativeai = "*"
 
 [dev-packages]
 
