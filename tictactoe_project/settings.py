@@ -5,7 +5,6 @@ from dotenv import load_dotenv  # Importante para cargar el archivo .env
 # Carga las variables del archivo .env al entorno de Python
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- CONFIGURACIÓN DE ANALYTICS (Puntos 5, 23, 24 y 27) ---
