@@ -1,6 +1,3 @@
-"""
-Django settings for tictactoe_project project.
-"""
 import os
 from pathlib import Path
 from dotenv import load_dotenv  # Importante para cargar el archivo .env
