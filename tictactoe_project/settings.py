@@ -3,16 +3,16 @@ Django settings for tictactoe_project project.
 """
 import os
 from pathlib import Path
-from dotenv import load_dotenv  # Importante para cargar el archivo .env [cite: 21]
+from dotenv import load_dotenv  # Importante para cargar el archivo .env
 
-# Carga las variables del archivo .env al entorno de Python [cite: 21]
+# Carga las variables del archivo .env al entorno de Python
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # --- CONFIGURACIÓN DE ANALYTICS (Puntos 5, 23, 24 y 27) ---
-# Se accede a las variables usando os.environ para mantener la seguridad [cite: 27]
+# Se accede a las variables usando os.environ para mantener la seguridad
 GOOGLE_ANALYTICS_MEASUREMENT_ID = os.environ.get('G-DMCBPQDS9Z')
 GOOGLE_ANALYTICS_STREAM_ID = os.environ.get('13312057147')
 GOOGLE_ANALYTICS_PROPERTY_ID = os.environ.get('520213170')
